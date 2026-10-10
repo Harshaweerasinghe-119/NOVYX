@@ -1,0 +1,559 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060b">
+<title>NOVYX — Tap & Earn</title>
+
+<style>
+:root {
+  --bg:#05060b;
+  --card:#101522;
+  --border:#242e42;
+  --cyan:#00eaff;
+  --purple:#a855f7;
+  --text:#f5f7ff;
+  --muted:#8e9bb0;
+  --green:#55edb0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(ellipse at 50% -10%,#142a48,transparent 48%),var(--bg);
+  color:var(--text);font-family:Arial,sans-serif;min-height:100vh
+}
+button,input{font:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:auto;padding:20px 15px 105px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{
+  width:44px;height:44px;border-radius:15px;display:grid;place-items:center;
+  color:var(--cyan);font-size:26px;font-weight:900;font-style:italic;
+  background:linear-gradient(145deg,#182a3e,#090b12);
+  border:1px solid #24516a;box-shadow:0 0 18px #00eaff20
+}
+.brand-name{font-size:20px;font-weight:900;letter-spacing:3px}
+.brand-sub{font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:4px}
+.status{font-size:10px;color:var(--green);padding:7px 10px;border:1px solid #245341;border-radius:30px}
+.page{display:none;animation:fade .22s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{color:var(--muted);font-size:10px;letter-spacing:2px}
+.heading{font-size:20px;font-weight:900;margin:12px 0 16px}
+.panel{
+  background:linear-gradient(145deg,#131a29,#090c13);
+  border:1px solid var(--border);border-radius:20px;padding:17px;margin-bottom:13px
+}
+.balance-panel{
+  background:radial-gradient(circle at 100% 0,#164055,transparent 45%),
+  linear-gradient(140deg,#121a29,#090b12);
+  border:1px solid #29384c;border-radius:23px;padding:21px;overflow:hidden
+}
+.label{font-size:10px;color:#a7b4c9;letter-spacing:2px}
+.balance-row{display:flex;align-items:center;gap:10px;margin:14px 0 19px}
+.mini-coin{
+  width:36px;height:36px;flex-shrink:0;border:2px solid var(--cyan);
+  border-radius:50%;display:grid;place-items:center;font-size:21px;font-weight:900;
+  background:#101b2a;color:#eaffff
+}
+.balance{font-size:clamp(27px,8vw,36px);font-weight:900;overflow-wrap:anywhere}
+.unit{font-size:10px;letter-spacing:2px;color:var(--cyan);margin-top:5px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:12px;background:#080d16aa;border-radius:13px}
+.stat small{display:block;color:var(--muted);font-size:10px}
+.stat strong{display:block;font-size:15px;margin-top:6px}
+.game{text-align:center;margin-top:15px;padding:20px 10px;border-radius:23px;border:1px solid var(--border);background:#0b0e17}
+.game-title{font-size:12px;letter-spacing:2px;font-weight:900}
+.game-sub{font-size:11px;color:var(--muted);margin-top:8px}
+.coin-area{height:270px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.glow{position:absolute;width:190px;height:190px;background:#00eaff17;border-radius:50%;filter:blur(30px)}
+.coin{
+  position:relative;width:210px;height:210px;padding:9px;border:0;border-radius:50%;
+  background:linear-gradient(140deg,#d9ffff,#00d8ef 12%,#27354b 30%,#070910 50%,#7949b6 77%,#00eaff);
+  box-shadow:0 0 18px #00eaff66,0 0 45px #00eaff22;
+  animation:float 3s ease-in-out infinite;transition:transform .1s;touch-action:manipulation
+}
+.coin:active{transform:scale(.9)}
+.rim{width:100%;height:100%;padding:8px;border-radius:50%;background:linear-gradient(145deg,#b5eaf3,#192536 40%,#090a12,#a78bfa)}
+.inner{
+  height:100%;border-radius:50%;border:2px solid #354d65;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 25% 20%,#263e56,transparent 45%),linear-gradient(145deg,#111a29,#03050a);
+  position:relative
+}
+.inner:before{content:"";position:absolute;inset:10px;border:1px dashed #00eaff77;border-radius:50%}
+.symbol{font-size:78px;line-height:1;font-weight:1000;font-style:italic;color:#efffff;text-shadow:0 0 10px var(--cyan),4px 4px 0 #6336a2}
+.coin-name{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:5px;margin-top:9px}
+.coin-stars{font-size:11px;color:#b89aff;margin-top:6px;letter-spacing:3px}
+@keyframes float{50%{filter:brightness(1.2)}}
+.point{
+  position:absolute;z-index:5;pointer-events:none;color:#75faff;font-size:25px;font-weight:900;
+  text-shadow:0 0 15px var(--cyan);animation:up .8s ease-out forwards
+}
+@keyframes up{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-110px) scale(1.2)}}
+.tap-hint{font-size:11px;letter-spacing:2px}
+.cyan{color:var(--cyan);font-size:12px;font-weight:800;margin-top:9px}
+.energy{margin-top:14px;padding:14px;border-radius:16px;border:1px solid var(--border);background:var(--card)}
+.energy-line{display:flex;justify-content:space-between;font-size:12px}
+.track{height:6px;border-radius:8px;background:#252c3c;margin-top:10px;overflow:hidden}
+.fill{height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--purple))}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:15px}
+.menu{
+  padding:16px 13px;min-height:120px;text-align:left;color:white;
+  border:1px solid var(--border);border-radius:18px;
+  background:linear-gradient(145deg,#151b2b,#0a0d14);transition:.15s
+}
+.menu:active{transform:scale(.96)}
+.menu-icon{font-size:25px;margin-bottom:15px}
+.menu-title{font-size:13px;font-weight:900}
+.menu-desc{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5}
+.btn{
+  width:100%;padding:13px;border-radius:12px;margin-top:12px;
+  color:white;font-weight:900;font-size:12px;
+  border:1px solid #0ccfe6;background:linear-gradient(100deg,#00abc9,#6950dc)
+}
+.btn.secondary{background:#101e2c;color:var(--cyan);border-color:#29475b}
+.btn:active{transform:scale(.98)}
+.input{
+  width:100%;padding:13px;margin-top:12px;border-radius:11px;
+  color:white;background:#070a11;border:1px solid #293247;outline:none;font-size:12px
+}
+.input:focus{border-color:var(--cyan)}
+.task{
+  display:flex;align-items:center;gap:11px;padding:14px 0;border-bottom:1px solid #ffffff0c
+}
+.task:last-child{border-bottom:0}
+.task-icon{font-size:23px;width:42px;height:42px;display:grid;place-items:center;background:#172034;border-radius:13px}
+.task-info{flex:1;min-width:0}
+.task-title{font-size:12px;font-weight:800}
+.task-desc{font-size:10px;color:var(--muted);line-height:1.5;margin-top:5px}
+.reward{font-size:11px;color:var(--cyan);font-weight:900;margin-top:5px}
+.small-btn{padding:9px 11px;border-radius:10px;border:1px solid #245366;background:#10232f;color:var(--cyan);font-size:10px;font-weight:900}
+.small-btn:disabled{opacity:.5;cursor:default}
+.ad-slot{
+  border:1px dashed #384158;border-radius:14px;padding:15px;margin:12px 0;
+  min-height:85px;display:flex;align-items:center;justify-content:center;
+  text-align:center;color:#748198;font-size:10px;line-height:1.7;background:#080b12
+}
+.ad-label{font-size:9px;letter-spacing:2px;color:#687990;margin-bottom:7px}
+.invite-box{text-align:center;padding:20px 12px}
+.invite-symbol{font-size:40px;margin-bottom:12px}
+.ref-stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.ref-stat div{background:#080d16;padding:13px;border-radius:13px}
+.ref-stat small{color:var(--muted);font-size:10px}
+.ref-stat strong{display:block;font-size:19px;margin-top:7px}
+.disclaimer{font-size:9px;color:#68768a;text-align:center;line-height:1.7;margin-top:20px}
+.nav{
+  position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;display:grid;grid-template-columns:repeat(4,1fr);
+  padding:10px 7px calc(10px + env(safe-area-inset-bottom));
+  background:#080b12f2;backdrop-filter:blur(18px);border-top:1px solid var(--border)
+}
+.nav button{border:0;background:transparent;color:#77849a;padding:7px 2px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.nav button.active{color:var(--cyan);background:#00eaff0d}
+.nav-icon{font-size:20px}.nav-label{font-size:9px;font-weight:900}
+.toast{
+  position:fixed;z-index:40;left:50%;bottom:90px;transform:translate(-50%,10px);
+  opacity:0;pointer-events:none;background:#122033;border:1px solid #275268;
+  border-radius:12px;padding:12px 17px;font-size:12px;text-align:center;
+  max-width:calc(100vw - 30px);transition:.2s
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:360px){.app{padding-left:11px;padding-right:11px}.coin{width:185px;height:185px}.coin-area{height:245px}.symbol{font-size:68px}}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header class="header">
+  <div class="brand">
+    <div class="logo">N</div>
+    <div><div class="brand-name">NOVYX</div><div class="brand-sub">TAP · EARN · LEVEL UP</div></div>
+  </div>
+  <div class="status">● DEMO</div>
+</header>
+
+<!-- HOME -->
+<section class="page active" id="home">
+  <div class="balance-panel">
+    <div class="label">YOUR NOVYX POINTS</div>
+    <div class="balance-row">
+      <div class="mini-coin">N</div>
+      <div><div class="balance" id="balance">0</div><div class="unit">NOVYX POINTS</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><small>LEVEL</small><strong id="level">Level 1</strong></div>
+      <div class="stat"><small>INVITED FRIENDS</small><strong id="refCount">0</strong></div>
+    </div>
+  </div>
+
+  <div class="game">
+    <div class="game-title">⚡ TAP TO EARN</div>
+    <div class="game-sub">Tap the coin to collect demo points</div>
+    <div class="coin-area" id="coinArea">
+      <div class="glow"></div>
+      <button class="coin" id="tapCoin" aria-label="Tap NOVYX coin">
+        <div class="rim"><div class="inner">
+          <div class="symbol">N</div><div class="coin-name">NOVYX</div><div class="coin-stars">✦ · ✦ · ✦</div>
+        </div></div>
+      </button>
+    </div>
+    <div class="tap-hint">TAP THE COIN TO EARN</div>
+    <div class="cyan">+1 POINT PER TAP</div>
+  </div>
+
+  <div class="energy">
+    <div class="energy-line"><strong>⚡ Energy</strong><span><span id="energy">1000</span> / 1000</span></div>
+    <div class="track"><div class="fill" id="energyFill"></div></div>
+  </div>
+
+  <div class="heading">Explore NOVYX</div>
+  <div class="menu-grid">
+    <button class="menu" onclick="showPage('tasks')"><div class="menu-icon">🎯</div><div class="menu-title">Tasks</div><div class="menu-desc">Complete available missions</div></button>
+    <button class="menu" onclick="showPage('referral')"><div class="menu-icon">👥</div><div class="menu-title">Referral</div><div class="menu-desc">Invite friends and earn</div></button>
+    <button class="menu" onclick="showPage('ads')"><div class="menu-icon">📢</div><div class="menu-title">Sponsored</div><div class="menu-desc">Advertisement area</div></button>
+    <button class="menu" onclick="showPage('profile')"><div class="menu-icon">◉</div><div class="menu-title">Profile</div><div class="menu-desc">View your demo account</div></button>
+  </div>
+</section>
+
+<!-- TASKS -->
+<section class="page" id="tasks">
+  <div class="eyebrow">MISSIONS CENTER</div>
+  <div class="heading">Tasks & Missions 🎯</div>
+  <div class="panel">
+    <div class="label">TASK PROGRESS</div>
+    <div style="font-size:23px;font-weight:900;margin-top:8px"><span id="taskProgress">0</span> / 6</div>
+    <div class="track"><div class="fill" id="taskFill" style="width:0%"></div></div>
+    <p class="task-desc" style="margin-top:10px">Demo tasks only. Completing a task does not require clicking an advertisement.</p>
+  </div>
+
+  <div class="panel" id="taskList"></div>
+
+  <div class="panel">
+    <div class="task-title">📌 About task rewards</div>
+    <p class="task-desc">These are demo points stored in your browser. Real rewards need server-side verification.</p>
+  </div>
+</section>
+
+<!-- REFERRAL -->
+<section class="page" id="referral">
+  <div class="eyebrow">GROW THE COMMUNITY</div>
+  <div class="heading">Referral Program 👥</div>
+  <div class="panel invite-box">
+    <div class="invite-symbol">🚀</div>
+    <div style="font-size:18px;font-weight:900">Invite Friends to NOVYX</div>
+    <p class="task-desc" style="margin-top:9px">Referral reward preview: 1,000 points for a verified new referral.</p>
+    <div class="ref-stat">
+      <div><small>REFERRALS</small><strong id="refStat">0</strong></div>
+      <div><small>POINTS EARNED</small><strong id="refPoints">0</strong></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="task-title">Your Referral Link</div>
+    <p class="task-desc">Set your Telegram bot username to create a demo link. This page alone cannot verify Telegram users.</p>
+    <input class="input" id="botUsername" placeholder="Your bot username (without @)" autocomplete="off">
+    <input class="input" id="refLink" readonly placeholder="Your referral link will appear here">
+    <button class="btn" onclick="copyReferral()">COPY REFERRAL LINK</button>
+    <p class="task-desc" style="margin-top:12px">1,000 points are shown as a preview only. A real referral must be verified by your bot/backend before crediting points.</p>
+  </div>
+</section>
+
+<!-- ADS -->
+<section class="page" id="ads">
+  <div class="eyebrow">SPONSORED CONTENT</div>
+  <div class="heading">Advertisements 📢</div>
+  <div class="panel">
+    <div class="task-title">Advertisement Area 1</div>
+    <p class="task-desc">Insert the official Adsterra ad tag supplied for your approved website here.</p>
+    <div class="ad-slot">
+      <div><div class="ad-label">ADVERTISEMENT</div>Adsterra placement 1<br>Paste your approved ad code here</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="task-title">Advertisement Area 2</div>
+    <p class="task-desc">Use a separate approved placement code if your publisher account provides one.</p>
+    <div class="ad-slot">
+      <div><div class="ad-label">ADVERTISEMENT</div>Adsterra placement 2<br>Paste your approved ad code here</div>
+    </div>
+  </div>
+  <p class="disclaimer">Do not ask users to click ads or reward them for ad views/clicks. Follow your publisher account's terms.</p>
+</section>
+
+<!-- PROFILE -->
+<section class="page" id="profile">
+  <div class="eyebrow">YOUR ACCOUNT</div>
+  <div class="heading">Profile ◉</div>
+  <div class="panel">
+    <div class="brand" style="margin-bottom:18px"><div class="logo">N</div><div><div class="brand-name">NOVYX USER</div><div class="brand-sub">LOCAL DEMO ACCOUNT</div></div></div>
+    <div class="task"><div class="task-info"><div class="task-title">Points</div></div><strong id="profileBalance">0</strong></div>
+    <div class="task"><div class="task-info"><div class="task-title">Level</div></div><strong id="profileLevel">Level 1</strong></div>
+    <div class="task"><div class="task-info"><div class="task-title">Completed Tasks</div></div><strong id="profileTasks">0 / 6</strong></div>
+    <button class="btn secondary" onclick="resetDemo()">RESET DEMO DATA</button>
+  </div>
+  <div class="panel"><div class="task-title">About NOVYX</div><p class="task-desc">A tap-to-earn prototype. Real accounts, referrals and secure balances require a backend and database.</p></div>
+</section>
+
+<p class="disclaimer">NOVYX DEMO • Points have no cash or cryptocurrency value.<br>Referral rewards are not credited as real rewards in this frontend demo.</p>
+</div>
+
+<nav class="nav">
+  <button class="active" data-page="home" onclick="showPage('home')"><span class="nav-icon">⌂</span><span class="nav-label">HOME</span></button>
+  <button data-page="tasks" onclick="showPage('tasks')"><span class="nav-icon">🎯</span><span class="nav-label">TASKS</span></button>
+  <button data-page="referral" onclick="showPage('referral')"><span class="nav-icon">👥</span><span class="nav-label">INVITE</span></button>
+  <button data-page="profile" onclick="showPage('profile')"><span class="nav-icon">◉</span><span class="nav-label">PROFILE</span></button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const KEY = "novyx_demo_full_v2";
+  const MAX_ENERGY = 1000;
+
+  const TASKS = [
+    {id:"first_tap",icon:"🪙",title:"First Tap",desc:"Tap the NOVYX coin once.",reward:50},
+    {id:"reach_100",icon:"⚡",title:"Tap 100 Times",desc:"Collect 100 points from tapping.",reward:100},
+    {id:"reach_500",icon:"🚀",title:"Earn 500 Points",desc:"Reach a balance of 500 demo points.",reward:150},
+    {id:"profile",icon:"👤",title:"Visit Your Profile",desc:"Open your NOVYX profile page.",reward:50},
+    {id:"referral_page",icon:"👥",title:"Explore Referrals",desc:"Open the referral page.",reward:50},
+    {id:"earn_page",icon:"🎯",title:"Explore Missions",desc:"Open the task center.",reward:50}
+  ];
+
+  let state = {
+    balance:0,
+    taps:0,
+    energy:MAX_ENERGY,
+    lastEnergyTime:Date.now(),
+    completed:[],
+    referrals:[],
+    referralCode:"",
+    referralProcessed:false
+  };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && typeof saved === "object") {
+      state = {...state,...saved};
+    }
+  } catch(e) {}
+
+  state.balance = Math.max(0,Number(state.balance)||0);
+  state.taps = Math.max(0,Number(state.taps)||0);
+  state.energy = Math.min(MAX_ENERGY,Math.max(0,Number(state.energy)||0));
+  if (!Array.isArray(state.completed)) state.completed=[];
+  if (!Array.isArray(state.referrals)) state.referrals=[];
+
+  if (!state.referralCode) {
+    state.referralCode = "N" + Math.random().toString(36).slice(2,9).toUpperCase();
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY,JSON.stringify(state)); } catch(e) {}
+  }
+
+  function level() {
+    return Math.floor(Math.sqrt(state.balance/100))+1;
+  }
+
+  function toast(message) {
+    const el=$("toast");
+    el.textContent=message;
+    el.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer=setTimeout(()=>el.classList.remove("show"),2200);
+  }
+
+  function render() {
+    const balance=Math.floor(state.balance);
+    $("balance").textContent=balance.toLocaleString();
+    $("energy").textContent=Math.floor(state.energy).toLocaleString();
+    $("energyFill").style.width=(state.energy/MAX_ENERGY*100)+"%";
+    $("level").textContent="Level "+level();
+    $("profileBalance").textContent=balance.toLocaleString();
+    $("profileLevel").textContent="Level "+level();
+    $("refCount").textContent=state.referrals.length;
+    $("refStat").textContent=state.referrals.length;
+    $("refPoints").textContent=(state.referrals.length*1000).toLocaleString();
+    $("profileTasks").textContent=state.completed.length+" / 6";
+    $("taskProgress").textContent=state.completed.length;
+    $("taskFill").style.width=(state.completed.length/6*100)+"%";
+    renderTasks();
+    save();
+  }
+
+  function renderTasks() {
+    $("taskList").innerHTML=TASKS.map(task=>{
+      const done=state.completed.includes(task.id);
+      return `<div class="task">
+        <div class="task-icon">${task.icon}</div>
+        <div class="task-info">
+          <div class="task-title">${task.title}</div>
+          <div class="task-desc">${task.desc}</div>
+          <div class="reward">+${task.reward} demo points</div>
+        </div>
+        <button class="small-btn" ${done?"disabled":""}
+          onclick="claimTask('${task.id}')">${done?"DONE":"CLAIM"}</button>
+      </div>`;
+    }).join("");
+  }
+
+  window.claimTask=function(id) {
+    const task=TASKS.find(t=>t.id===id);
+    if (!task) return;
+    if (state.completed.includes(id)) {
+      toast("This task has already been completed.");
+      return;
+    }
+
+    // Demo-only client checks. These are not secure server verification.
+    if (id==="first_tap" && state.taps<1) {
+      toast("Tap the NOVYX coin first.");
+      return;
+    }
+    if (id==="reach_100" && state.taps<100) {
+      toast("Tap the coin 100 times first.");
+      return;
+    }
+    if (id==="reach_500" && state.balance<500) {
+      toast("Reach 500 points first.");
+      return;
+    }
+
+    state.completed.push(id);
+    state.balance+=task.reward;
+    render();
+    toast("Task completed! +"+task.reward+" demo points");
+  };
+
+  window.showPage=function(id) {
+    document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+
+    if (id==="profile") completeTaskIfEligible("profile");
+    if (id==="referral") completeTaskIfEligible("referral_page");
+    if (id==="tasks") completeTaskIfEligible("earn_page");
+
+    render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  };
+
+  function completeTaskIfEligible(id) {
+    // Visiting a page only unlocks the task; user claims it in the task list.
+    if (id==="profile" || id==="referral_page" || id==="earn_page") {
+      // Keep page-visit state simple in this demo.
+      try {
+        const visits=JSON.parse(sessionStorage.getItem("novyx_visits")||"[]");
+        if (!visits.includes(id)) {
+          visits.push(id);
+          sessionStorage.setItem("novyx_visits",JSON.stringify(visits));
+        }
+      } catch(e) {}
+    }
+  }
+
+  function floatPoint(x,y) {
+    const area=$("coinArea");
+    const rect=area.getBoundingClientRect();
+    const point=document.createElement("span");
+    point.className="point";
+    point.textContent="+1";
+    point.style.left=(x-rect.left)+"px";
+    point.style.top=(y-rect.top)+"px";
+    area.appendChild(point);
+    setTimeout(()=>point.remove(),850);
+  }
+
+  $("tapCoin").addEventListener("click",event=>{
+    const now=Date.now();
+    const elapsed=Math.max(0,(now-(Number(state.lastEnergyTime)||now))/1000);
+    state.energy=Math.min(MAX_ENERGY,state.energy+elapsed);
+    state.lastEnergyTime=now;
+
+    if(state.energy<1) {
+      toast("Energy is empty. Wait for it to recharge.");
+      render();
+      return;
+    }
+
+    state.energy-=1;
+    state.balance+=1;
+    state.taps+=1;
+
+    const coin=$("tapCoin");
+    coin.style.animation="none";
+    void coin.offsetWidth;
+    coin.style.animation="";
+    floatPoint(event.clientX,event.clientY);
+
+    if(navigator.vibrate) {
+      try{navigator.vibrate(15)}catch(e){}
+    }
+    render();
+  });
+
+  // Demo referral link. Real Telegram referrals must be verified server-side.
+  function updateReferralLink() {
+    const username=$("botUsername").value.trim().replace(/^@/,"");
+    if(!/^[a-zA-Z0-9_]{5,32}$/.test(username)) {
+      $("refLink").value="";
+      return;
+    }
+    $("refLink").value="https://t.me/"+username+"?start=ref_"+state.referralCode;
+  }
+
+  $("botUsername").addEventListener("input",updateReferralLink);
+
+  window.copyReferral=async function() {
+    updateReferralLink();
+    const link=$("refLink").value;
+    if(!link) {
+      toast("Enter your Telegram bot username first.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      toast("Referral link copied!");
+    } catch(e) {
+      $("refLink").select();
+      toast("Select and copy the referral link.");
+    }
+  };
+
+  // Do not credit points merely because a URL contains a referral code.
+  // A real backend must verify the Telegram user and prevent self-referrals/duplicates.
+  const params=new URLSearchParams(location.search);
+  const incoming=params.get("ref");
+  if(incoming && incoming!==state.referralCode) {
+    toast("Referral detected in demo. Server verification is required.");
+  }
+
+  window.resetDemo=function() {
+    if(!confirm("Reset local NOVYX demo data?")) return;
+    state={
+      balance:0,taps:0,energy:MAX_ENERGY,lastEnergyTime:Date.now(),
+      completed:[],referrals:[],referralCode:"N"+Math.random().toString(36).slice(2,9).toUpperCase(),
+      referralProcessed:false
+    };
+    save();
+    render();
+    toast("Demo data reset.");
+    showPage("home");
+  };
+
+  // Regenerate energy over time.
+  setInterval(()=>{
+    const now=Date.now();
+    const elapsed=Math.max(0,(now-(Number(state.lastEnergyTime)||now))/1000);
+    state.energy=Math.min(MAX_ENERGY,state.energy+elapsed);
+    state.lastEnergyTime=now;
+    render();
+  },1000);
+
+  render();
+})();
+</script>
+</body>
+</html>
+```
